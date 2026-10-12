@@ -1,0 +1,253 @@
+@import "tailwindcss";
+
+/* One source of truth for theming: <html data-theme="dark|light">.
+   The `dark:` variant is bound to that same attribute. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* ------------------------------------------------------------------
+   Static tokens (emitted as real CSS variables)
+------------------------------------------------------------------- */
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Space Grotesk', 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  /* Fixed surfaces that do not change with theme (brand panels, final CTA) */
+  --color-obsidian: #0b0c0d;
+  --color-bone: #f1eee6;
+  --color-ink: #14150f;
+
+  --animate-pulse-dot: qz-pulse-dot 2s ease-in-out infinite;
+  --animate-slide: qz-slide 1.1s ease-in-out infinite;
+
+  @keyframes qz-slide {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(300%); }
+  }
+  @keyframes qz-pulse-dot {
+    0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, currentColor 45%, transparent); }
+    50% { box-shadow: 0 0 0 5px color-mix(in oklab, currentColor 0%, transparent); }
+  }
+}
+
+/* ------------------------------------------------------------------
+   Theme-aware tokens (inline so utilities read the live CSS variable)
+------------------------------------------------------------------- */
+@theme inline {
+  --color-bg-primary: var(--qz-surface);
+  --color-bg-secondary: var(--qz-canvas);
+  --color-bg-tertiary: var(--qz-sunken);
+  --color-text-primary: var(--qz-t1);
+  --color-text-secondary: var(--qz-t2);
+  --color-text-tertiary: var(--qz-t3);
+  --color-border-subtle: var(--qz-line);
+  --color-border-strong: var(--qz-line-strong);
+  --color-brand-accent: var(--qz-accent);
+  --color-brand-accent-text: var(--qz-accent-on);
+  --color-signal: var(--qz-signal);
+  --color-signal-ink: var(--qz-signal-ink);
+  --color-warn: var(--qz-warn);
+  --color-danger: var(--qz-danger);
+}
+
+/* LIGHT — bone / warm off-white. Surface = cards, canvas = page, sunken = wells & hovers. */
+:root,
+:root[data-theme="light"] {
+  color-scheme: light;
+  --qz-surface: #fbf9f4;
+  --qz-canvas: #f1eee6;
+  --qz-sunken: #e7e3d8;
+  --qz-t1: #14150f;
+  --qz-t2: #55574b;
+  --qz-t3: #6b6d60;
+  --qz-line: #ddd8cb;
+  --qz-line-strong: #bdb7a6;
+  --qz-accent: #14150f;
+  --qz-accent-on: #f4f1ea;
+  --qz-signal: #c6f432;
+  --qz-signal-ink: #4b6b00;
+  --qz-warn: #8a5700;
+  --qz-danger: #c2362a;
+  --qz-focus: #14150f;
+  --qz-grid: rgba(20, 21, 15, 0.055);
+  --qz-shadow: 0 1px 0 rgba(20, 21, 15, 0.04), 0 12px 32px -18px rgba(20, 21, 15, 0.22);
+  --qz-glow: rgba(198, 244, 50, 0.35);
+}
+
+/* DARK — obsidian / graphite. Its own hierarchy, not an inversion. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --qz-surface: #121417;
+  --qz-canvas: #0a0b0c;
+  --qz-sunken: #1a1d21;
+  --qz-t1: #f1f0ea;
+  --qz-t2: #a4a69c;
+  --qz-t3: #7c7f76;
+  --qz-line: #23262a;
+  --qz-line-strong: #363a40;
+  --qz-accent: #c6f432;
+  --qz-accent-on: #0b0c0d;
+  --qz-signal: #c6f432;
+  --qz-signal-ink: #c6f432;
+  --qz-warn: #f5b83d;
+  --qz-danger: #ff6b5b;
+  --qz-focus: #c6f432;
+  --qz-grid: rgba(241, 240, 234, 0.045);
+  --qz-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02), 0 18px 40px -24px rgba(0, 0, 0, 0.8);
+  --qz-glow: rgba(198, 244, 50, 0.18);
+}
+
+/* ------------------------------------------------------------------
+   Base
+------------------------------------------------------------------- */
+@layer base {
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  body {
+    background-color: var(--qz-canvas);
+    color: var(--qz-t1);
+    font-family: var(--font-sans);
+    font-feature-settings: 'cv11', 'ss01';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection { background: var(--qz-signal); color: #10120a; }
+  :focus-visible { outline: 2px solid var(--qz-focus); outline-offset: 2px; border-radius: 4px; }
+  /* Surfaces whose colors do not follow the theme need their own focus color. */
+  [data-surface='dark'] :focus-visible { outline-color: #c6f432; }
+  [data-surface='signal'] :focus-visible { outline-color: #14150f; }
+  button, [role="button"], a { -webkit-tap-highlight-color: transparent; }
+}
+
+/* ------------------------------------------------------------------
+   Type scale
+   display / hero / section / page / body / meta / label / caption / metric / token
+------------------------------------------------------------------- */
+@utility t-display {
+  font-family: var(--font-display);
+  font-size: clamp(3.5rem, 11vw, 9.5rem);
+  line-height: 0.9;
+  letter-spacing: -0.055em;
+  font-weight: 600;
+}
+@utility t-hero {
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 6.4vw, 6rem);
+  line-height: 0.96;
+  letter-spacing: -0.045em;
+  font-weight: 600;
+}
+@utility t-section {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4.4vw, 3.9rem);
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  font-weight: 600;
+}
+@utility t-page {
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 3.4vw, 2.75rem);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  font-weight: 600;
+}
+@utility t-body {
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--qz-t2);
+}
+@utility t-lead {
+  font-size: clamp(1.05rem, 1.5vw, 1.3rem);
+  line-height: 1.55;
+  color: var(--qz-t2);
+}
+@utility t-meta {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--qz-t2);
+}
+@utility t-label {
+  font-size: 0.6875rem;
+  line-height: 1.2;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--qz-t3);
+}
+@utility t-caption {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--qz-t3);
+}
+@utility t-metric {
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 4vw, 3.5rem);
+  line-height: 1;
+  letter-spacing: -0.045em;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+@utility t-token {
+  font-family: var(--font-display);
+  line-height: 0.88;
+  letter-spacing: -0.06em;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------------
+   Utilities
+------------------------------------------------------------------- */
+@utility scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar { display: none; }
+}
+@utility bg-grid {
+  background-image:
+    linear-gradient(var(--qz-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--qz-grid) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+@utility shadow-card { box-shadow: var(--qz-shadow); }
+@utility grain {
+  position: relative;
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.06;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .7 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+}
+
+/* Queue token chip used by the signature token strip. State is driven by data attributes. */
+.qz-token {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--qz-line-strong);
+  border-radius: 10px;
+  background: var(--qz-surface);
+  color: var(--qz-t1);
+  will-change: transform, opacity;
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+.qz-token[data-state='current'] { background: var(--qz-signal); color: #10120a; border-color: transparent; box-shadow: 0 0 60px -8px var(--qz-glow); }
+.qz-token[data-state='done'] { color: var(--qz-t3); border-style: dashed; }
+.qz-token[data-you='true']:not([data-state='current']) { border-color: var(--qz-t1); border-width: 1.5px; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
